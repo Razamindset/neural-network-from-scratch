@@ -39,7 +39,6 @@ class NeuralNetwork:
         s = self.sigmoid(x)
         return s * (1 - s)    
     
-    
     def forward(self, X):
         """
         Performs the forward pass through the neural network.
@@ -222,3 +221,4 @@ if __name__ == "__main__":
     
     test_input4 = np.array([[1, 1]])
     print(f"Input: {test_input4}, Prediction: {(nn.forward(test_input4) > 0.5).astype(int)}")
+                
