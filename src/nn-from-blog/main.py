@@ -4,6 +4,7 @@ import numpy as np
 # All the attribuition is to this great blog https://victorzhou.com/blog/intro-to-neural-networks/ for code and images
 # All the code is the same but i have added a lot of comments in my language that make me understnd things easier
 # It must be noted that this is not the optimal way but its perfect for understanding
+# Uses: stochastic gradient descent - SGD
 
 def sigmoid(x):
     """Squishify the ouput values btw 1 and 0"""
