@@ -73,56 +73,50 @@ class NeuralNetwork:
             y_true (np.array): True labels corresponding to the input data.
             output_pred (np.array): Predicted output from the forward pass.
         """
-        num_samples = X.shape[0]
+        
+        # --- Step 1 is to calculate the error over the output layer ---
+        # This is the derivative of the loss with respect to the output layer's pre-activation (z2).
+        # By the chain rule: d(Loss)/d(z2) = d(Loss)/d(a2) * d(a2)/d(z2)
+        # d(Loss)/d(a2) is the derivative of the MSE loss, which is (output_pred - y_true).
+        # d(a2)/d(z2) is the derivative of the sigmoid activation function.
+        # The result is the 'error' that we'll propagate backward.
+        error_at_output_layer = (output_pred - y_true) * self.sigmoid_derivitive(self.z2) # This was 'delta2'
+        
+        # --- Step 2: Calculate gradients for the output layer weights (w2) and biases (b2) ---
+        # The gradient for w2 is d(Loss)/d(w2) = d(Loss)/d(z2) * d(z2)/d(w2)
+        # d(z2)/d(w2) is simply the hidden layer's activation, a1.
+        # While d(Loss)/d(z2) is from the above calculation
+        # We use a dot product to correctly sum the gradients for all samples in the batch.
+        gradient_w2 = np.dot(self.a1.T, error_at_output_layer) # This was 'dw2'
+        
+        #* We use the transpose to align matrix dimensions for the dot product, ensuring the resulting gradient 
+        #* matrix has the same shape as the weight matrix we intend to update.
+        
+        # The gradient for b2 is d(Loss)/d(b2) = d(Loss)/d(z2) * d(z2)/d(b2)
+        # d(z2)/d(b2) is 1, so we just sum the error for all samples.
+        gradient_b2 = np.sum(error_at_output_layer, axis=0, keepdims=True) # This was 'db2'
+        
+        # --- Step 3: Propagate the error to the hidden layer ---
+        # We calculate the error at the hidden layer's pre-activation (z1).
+        # Chain rule: d(Loss)/d(z1) = d(Loss)/d(a2) * d(a2)/d(z2) * d(z2)/d(a1) * d(a1)/d(z1)
+        # This simplifies to: [error_at_output_layer .dot. w2.T] * sigmoid_derivative(z1) 
+        error_at_hidden_layer = np.dot(error_at_output_layer, self.w2.T) * self.sigmoid_derivitive(self.z1)
 
-        # --- Output Layer (Layer 2) Backpropagation ---
-        # Calculate the error at the output layer.
-        # This is the difference between predicted and true values,
-        # multiplied by the derivative of the sigmoid of the output layer's weighted sum.
-        # The (output_pred - y_true) gives the gradient of MSE w.r.t. a2.
-        # Multiplying by sigmoid_derivative(self.z2) applies the chain rule for the activation.
-        # Shape: (num_samples, output_size)
-        delta2 = (output_pred - y_true) * self.sigmoid_derivitive(self.z2)
+        # --- Step 4: Calculate gradients for the hidden layer weights (w1) and biases (b1) ---
+        # The gradient for w1 is d(Loss)/d(w1) = d(Loss)/d(z1) * d(z1)/d(w1)
+        # d(z1)/d(w1) is the input, X.
+        gradient_w1 = np.dot(X.T, error_at_hidden_layer)
         
-        # Calculate the gradient of the weights for w2.
-        # This is the transpose of the hidden layer activations multiplied by the output layer error.
-        # np.dot(self.a1.T, delta2) ensures the dimensions align correctly:
-        # (hidden_size, num_samples) dot (num_samples, output_size) -> (hidden_size, output_size)
-        dw2 = np.dot(self.a1.T, delta2)
+        # The gradient for b1 is d(Loss)/d(b1) = d(Loss)/d(z1) * d(z1)/d(b1)
+        # d(z1)/d(b1) is 1.
+        gradient_b1 = np.sum(error_at_hidden_layer, axis=0, keepdims=True)
         
-        # Calculate the gradient of the biases for b2.
-        # This is the sum of the output layer error along the sample axis (axis=0).
-        # np.sum(delta2, axis=0, keepdims=True) ensures the shape remains (1, output_size)
-        db2 = np.sum(delta2, axis=0, keepdims=True)
-        
-        # Update weights and biases for the output layer
-        self.w2 -= self.learning_rate * dw2
-        self.b2 -= self.learning_rate * db2
-        
-        # --- Hidden Layer (Layer 1) Backpropagation ---
-        # Calculate the error at the hidden layer.
-        # This error propagates from the output layer's error (delta2)
-        # through the weights connecting the hidden to output layer (self.w2.T),
-        # then multiplied by the derivative of the sigmoid of the hidden layer's weighted sum.
-        # np.dot(delta2, self.w2.T) ensures dimensions align:
-        # (num_samples, output_size) dot (output_size, hidden_size) -> (num_samples, hidden_size)
-        # Shape: (num_samples, hidden_size)
-        delta1 = np.dot(delta2, self.w2.T) * self.sigmoid_derivitive(self.z1)
-        
-        # Calculate the gradient of the weights for w1.
-        # This is the transpose of the input data multiplied by the hidden layer error.
-        # np.dot(X.T, delta1) ensures dimensions align:
-        # (input_size, num_samples) dot (num_samples, hidden_size) -> (input_size, hidden_size)
-        dw1 = np.dot(X.T, delta1)
-        
-        # Calculate the gradient of the biases for b1.
-        # This is the sum of the hidden layer error along the sample axis (axis=0).
-        # np.sum(delta1, axis=0, keepdims=True) ensures the shape remains (1, hidden_size)
-        db1 = np.sum(delta1, axis=0, keepdims=True)
-        
-        # Update weights and biases for the hidden layer
-        self.w1 -= self.learning_rate * dw1
-        self.b1 -= self.learning_rate * db1
+        # --- Step 5: Update all weights and biases ---
+      # We adjust the weights and biases in the opposite direction of their gradients.
+        self.w2 -= self.learning_rate * gradient_w2
+        self.b2 -= self.learning_rate * gradient_b2
+        self.w1 -= self.learning_rate * gradient_w1
+        self.b1 -= self.learning_rate * gradient_b1
     
     def calculate_loss(self, y_true, y_pred):
         """
