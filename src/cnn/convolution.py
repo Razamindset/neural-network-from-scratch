@@ -3,7 +3,6 @@ from PIL import Image
 from scipy.signal import correlate2d, convolve2d
 import matplotlib.pyplot as plt
 
-
 class Convolution:
     def __init__(self, input_shape,  n_kernels, kernel_size):
         self.input_shape = input_shape # (channel, height, width)
@@ -50,7 +49,7 @@ class Convolution:
         # RELU Activation 
         out_maps = np.maximum(0, out_maps)
 
-        return out_maps, self.last_output
+        return out_maps
 
     def backward(self,output_gradient, learning_rate):
         """Calculate and update the kernel gradient and bias"""
@@ -92,115 +91,3 @@ class Convolution:
         self.kernels_bias -= learning_rate * bias_gradients
 
         return input_gradients
-
-class MaxPooling:
-    def __init__(self):
-        pass
-
-def sigmoid(X):
-    """
-    Sigmoid activation function.
-    f(x) = 1 / (1 + e^(-x))
-    """
-    return 1 / (1 + np.exp(-X))
-
-def sigmoid_derivative(X):
-    """
-    Derivative of the sigmoid function. This is used during backpropagation.
-    d/dx sigmoid(x) = sigmoid(x) * (1 - sigmoid(x))
-    """
-    s = sigmoid(X)
-    return s * (1 - s)    
-
-def calculate_loss(y_true, y_pred):
-    """MSE: Mean Squared Error"""
-    return np.mean(np.square(y_true - y_pred))
-
-
-# Todos
-# Use relu instead of sigmoid
-# use Cross Entropy Loss instead of MSE
-# Use Xavier Initilization -> Initlize based on inoout and output signals
-class Dense:
-    def __init__(self, input_size, hidden_size, output_size, lr=0.001):
-        """Initilize the weights and biases for the first and hidden layer"""
-        self.input_size = input_size
-        self.hidden_size = hidden_size
-        self.output_size = output_size
-
-        # Randomly initilize the weights and biases for w1, b1, w2, b2 ...etc
-
-        # Input Layer -> Hidden
-        self.w1 = np.random.rand(input_size, hidden_size)
-        self.b1 = np.random.rand(1, hidden_size)
-
-        # Hidden layer -> Output
-        self.w2 = np.random.rand(hidden_size, output_size)
-        self.b2 = np.random.rand(1, output_size)
-
-        self.learning_rate = lr
-    
-    def forward(self, X):
-        # Perform the forward pass
-
-        # Gives a col matrix with sum products for each node in hidden layer
-        # Propagation: Input -> hidden
-        self.z1 = np.dot(X, self.w1) + self.b1
-        self.a1 = sigmoid(self.z1)
-
-        self.z2 = np.dot(self.a1, self.w2) + self.b2
-        self.a2 = sigmoid(self.z2)
-        
-        return self.a2
-
-    def backward(self, X, y_true, y_pred):
-        # use the error to tune hte wights and biases to reduce the error
-
-        # See neural-network.nn.py or see the notes
-        error_at_output = (y_pred - y_true) * sigmoid_derivative(self.z2)
-
-        # Hidden layer gradients
-        gradient_w2 = np.dot(self.a1.T, error_at_output) # hidden size, output_size
-
-        gradient_b2 = np.sum(error_at_output, axis=0, keepdims=True)
-
-        # gradients at first layer
-
-        error_at_hidden =  np.dot(error_at_output, self.w2.T) * sigmoid_derivative(self.z1)
-
-        gradient_w1 = np.dot(X.T, error_at_hidden)
-
-        gradient_b1 = np.sum(error_at_hidden, axis=0, keepdims=True)
-
-        # Apply the calculated gradients
-        self.w1 -= self.learning_rate * gradient_w1
-        self.b1 -= self.learning_rate * gradient_b1
-
-        self.w2 -= self.learning_rate * gradient_w2
-        self.b2 -= self.learning_rate * gradient_b2
-
-
-img = Image.open("image.png")
-
-gray_img = img.convert("L")
-
-gray_array = np.array(gray_img)
-
-plt.imshow(gray_array, cmap="gray")
-
-plt.show()
-
-gray_array = np.expand_dims(gray_array, axis=0)
-
-# print(gray_array.shape)
-
-
-cnn = Convolution(gray_array.shape, 5, 25)
-
-maps, _ = cnn.forward(gray_array)
-
-plt.imshow(maps[0], cmap="gray")
-
-plt.axis("off")
-
-plt.show()
