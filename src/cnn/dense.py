@@ -13,6 +13,6 @@ class Dense:
     def backward(self, output_gradient, learning_rate):
         weights_gradient = np.dot(output_gradient, self.input.T)
         input_gradient = np.dot(self.weights.T, output_gradient)
-        self.weights -= self.learning_rate * weights_gradient
-        self.biases += self.learning_rate * output_gradient
+        self.weights -= learning_rate * weights_gradient
+        self.biases += learning_rate * output_gradient
         return input_gradient

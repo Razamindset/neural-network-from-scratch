@@ -1,7 +1,5 @@
 import numpy as np
-from PIL import Image
 from scipy.signal import correlate2d, convolve2d
-import matplotlib.pyplot as plt
 
 class Convolution:
     def __init__(self, input_shape,  n_kernels, kernel_size):

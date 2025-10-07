@@ -1,20 +1,5 @@
 import numpy as np
 
-def sigmoid(X):
-    """
-    Sigmoid activation function.
-    f(x) = 1 / (1 + e^(-x))
-    """
-    return 1 / (1 + np.exp(-X))
-
-def sigmoid_derivative(X):
-    """
-    Derivative of the sigmoid function. This is used during backpropagation.
-    d/dx sigmoid(x) = sigmoid(x) * (1 - sigmoid(x))
-    """
-    s = sigmoid(X)
-    return s * (1 - s)    
-
 def mse(y_true, y_pred):
     """MSE: Mean Squared Error"""
     return np.mean(np.square(y_true - y_pred))
