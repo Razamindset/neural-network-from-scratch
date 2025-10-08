@@ -7,7 +7,13 @@ class Activation:
 
     def forward(self, input):
         self.input = input
-        return self.activation(input)
+
+        output = self.activation(self.input)
+
+        # if output.ndim == 1:
+        #     output = output.reshape(1, -1)
+        
+        return output
 
     def backward(self, output_gradient, learning_rate):
         return np.multiply(output_gradient, self.activation_prime(self.input))

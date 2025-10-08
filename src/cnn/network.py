@@ -3,7 +3,14 @@ def predict(network, input):
 
     # We will loop through all the layer passes output of one as input to the other
     output = input
-    for layer in network:
+
+    # print(f"[DEBUG] Input to this layer: {input.reshape(-1, 1)}")
+    for i, layer in enumerate(network):
+
+        # if i == 1:
+        #     print(f"[DEBUG] Shape from {i+1}th layer: {output.shape}")
+        #     print(f"[DEBUG] output from {i+1}th layer: {output}")
+
         output = layer.forward(output)
     return output
 
@@ -22,7 +29,7 @@ def train(network, loss, loss_prime, X_train, y_train, learning_rate=0.001, epoc
             gradient = loss_prime(y, output)
 
             for layer in reversed(network):
-                layer.backward(gradient, learning_rate)
+                gradient = layer.backward(gradient, learning_rate)
         
         error /= len(X_train)
         if verbose:
