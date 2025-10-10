@@ -2,3 +2,4 @@
 .scripts
 .vscode
 __pycache__
+datasets
