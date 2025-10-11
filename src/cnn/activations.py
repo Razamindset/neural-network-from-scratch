@@ -12,29 +12,17 @@ class Sigmoid(Activation):
 
         super().__init__(sigmoid, sigmoid_prime)
 
-
-
 # This is a different kid of activation we donot need it for early testing
+# I donot understand the math completely but i will just use this for now.
 class Softmax:
-    # When using softmax prime with cross entropy loss we donot need
-    # softmax prime the gradient of the ouput containing the calc for 
-    # softmax prime can be represented as loss = predicted - target 
     def __init__(self):
         pass
 
     def forward(self, input):
-        """For each comp of z-> activation=(e^z)/sum(e^z1 + e^z2 + ...)"""
-        tmp = np.exp(input)
-        self.output = tmp / np.sum(tmp)
+        exps = np.exp(input - np.max(input))
+        self.output = exps / np.sum(exps)
         return self.output
 
-    # I dont understand shit about this. 
-    # Just feels okay
-    # We need to look at this in free time
-    # See page number 5 for mathematics
-    # The backdrop seems do some magic and make the gradients layer for prev layer
-    # Where these can be used to calculate weights gradients
     def backward(self, output_gradient, learning_rate):
-        n = np.size(self.output)
-        return np.dot((np.identity(n) - self.output.T) * self.output, output_gradient)
-
+        # Simple element-wise gradient for softmax + MSE
+        return self.output * (output_gradient - np.sum(output_gradient * self.output))

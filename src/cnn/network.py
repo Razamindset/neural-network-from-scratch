@@ -33,5 +33,5 @@ def train(network, loss, loss_prime, X_train, y_train, learning_rate=0.001, epoc
         
         error /= len(X_train)
         if verbose:
-            if epoch % (epochs // 10) == 0:
-                print(f"{epoch + 1}/{epochs}, error={error}")
+            # if epoch % 10 == 0:
+            print(f"{epoch + 1}/{epochs}, error={error}")
