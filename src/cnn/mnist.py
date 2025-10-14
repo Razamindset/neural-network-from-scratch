@@ -1,9 +1,11 @@
+# Need to work nd learn about cross entropy and different types  of cross entropy losses.
+
 import pandas as pd
 import numpy as np
 from dense import Dense
 from activations import Sigmoid, Softmax
 from network import train, predict
-from losses import mse, mse_prime
+from losses import binary_cross_entropy, binary_cross_entropy_prime, categorical_cross_entropy, categorical_cross_entropy_prime
 
 train_data = pd.read_csv("datasets/mnist_train.csv")
 test = pd.read_csv("datasets/mnist_test.csv")
@@ -26,13 +28,13 @@ network = [
     Softmax(),
 ]
 
-train(network, mse , mse_prime, X_train, y_train, epochs=1000, learning_rate=0.01, verbose=True)
+# For using categorical cross entropy we need one hot encoding 
+num_classes = 10
+y_train_onehot = np.eye(num_classes)[y_train]
+y_test_onehot = np.eye(num_classes)[y_test]
 
-for x, y in zip(X_test, y_test):
+train(network, categorical_cross_entropy , categorical_cross_entropy_prime, X_train, y_train_onehot, epochs=1000, learning_rate=0.1, verbose=True)
+
+for x, y in zip(X_test, y_test_onehot):
     prediction = predict(network, x)
     print(f"Prediction: {prediction}, Actual: {y}")
-
-
-
-
-
